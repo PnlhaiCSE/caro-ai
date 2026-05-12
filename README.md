@@ -104,7 +104,7 @@ chmod +x create-container.sh
 # Option 2 — Run locally on Linux using the provided script
 # This will create a virtual environment, install dependencies, and run the Flask app
 chmod +x run-app.sh
-./run-app.sh
+./run-app.sh 
 ```
 
 Then open:
