@@ -33,10 +33,12 @@ CARO-AI
 │       ├── script.js       # Frontend game logic and API calls
 │       └── style.css       # UI styling
 │
+├── create-container.sh     # Build & run using Docker
+├── run-app.sh              # Run local
 ├── Dockerfile              # Container
 ├── docker-compose.yaml     # Orchestration
 ├── .gitignore              # Files ignored by Git
-└── README.md               # Project documentation
+└── README.md               # Documentation
 ```
 
 ---
@@ -92,9 +94,17 @@ Return best move
 
 ```bash
 git clone https://github.com/pnlhaiIT/caro-ai.git
-cd caro-ai/engine
-pip install -r requirements.txt
-python app.py
+cd caro-ai
+
+# Option 1 — Run with Docker (recommended)
+# make scripts executable and run the helper which builds and starts the container
+chmod +x create-container.sh
+./create-container.sh
+
+# Option 2 — Run locally on Linux using the provided script
+# This will create a virtual environment, install dependencies, and run the Flask app
+chmod +x run-app.sh
+./run-app.sh
 ```
 
 Then open:
