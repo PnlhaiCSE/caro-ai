@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>500 - Server Error</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/error.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="err">500</div>
+
+        <h2>Internal Server Error</h2>
+        <p>Lỗi server nội bộ. Vui lòng liên hệ quản trị viên 😵</p>
+        <button class="btn" onclick="window.location.reload()">
+            Tải lại
+        </button>
+
+        <a class="email" href="mailto:Phamnguyenlonghai240106@gmail.com?subject=Lỗi%20server%20Game%20caro%20mày%20ơi">
+            Gửi email báo lỗi
+        </a>
+    </div>
+
+    <div id="ngang">
+        📱<br>
+        Vui lòng xoay dọc màn hình
+    </div>
+    <script>
+        function checkNgang() {
+            const mobile = navigator.maxTouchPoints > 0 &&
+                /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            const ngangg = window.innerWidth > window.innerHeight;
+
+            $("#ngang").css("display",
+                mobile && ngangg ? "flex" : "none"
+            );
+        }
+
+        $(window).on("resize orientationchange", checkNgang);
+
+        $(document).ready(function () {
+            checkNgang();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,9 +1,17 @@
+version: '3.9'
+
 services:
   caro-engine:
-    build:
-      context: .
+    build: 
+      context: ./engine
       dockerfile: Dockerfile
     container_name: caro-engine
     restart: always
     ports:
       - "5100:5100"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

@@ -9,7 +9,6 @@ with CONFIG_PATH.open("r", encoding="utf-8") as f:
     CFG = json.load(f)
 
 DIRECTIONS = [tuple(direction) for direction in CFG["DIRECTIONS"]]
-DIFFICULTY_DEPTH = {int(k): v for k, v in CFG["DIFFICULTY_DEPTH"].items()}
 THREAT_CHECK_PATTERNS = [(p, w) for p, w in CFG["THREAT_CHECK_PATTERNS"]]
 PATTERN_BLOCKS = [(p, idxs, w) for p, idxs, w in CFG["PATTERN_BLOCKS"]]
 EVAL_PATTERNS_O = [(p, w) for p, w in CFG["EVAL_PATTERNS_O"]]
@@ -18,7 +17,6 @@ EVAL_PATTERNS_X = [(p, w) for p, w in CFG["EVAL_PATTERNS_X"]]
 TRANSPOSITION_TABLE = {}
 MOVE_SCORE_CACHE = {}
 MOVE_GEN_CACHE = {}
-
 
 def bstate(board):
     return "".join("".join(row) for row in board)
@@ -42,7 +40,6 @@ def get_moves(board, radius=2):
                         nr, nc = r + dr, c + dc
                         if 0 <= nr < SIZE and 0 <= nc < SIZE and board[nr][nc] == ".":
                             moves.add((nr, nc))
-
     if not has_piece:
         center = SIZE // 2
         generated_moves = [(center, center)]
@@ -69,7 +66,6 @@ def get_line(board, r, c, dr, dc):
 
 def get_lines(board):
     lines = []
-
     for r in range(SIZE):
         lines.append([board[r][c] for c in range(SIZE)])
 
@@ -137,7 +133,6 @@ def count_threats(board, r, c, player):
     open4 = 0
     close4 = 0
     open3 = 0
-
     if player == "O":
         open4_patterns = [".OOOO."]
         close4_patterns = ["OOOO.", ".OOOO", "OOO.O", "OO.OO", "O.OOO"]
@@ -156,20 +151,16 @@ def count_threats(board, r, c, player):
 
         for p in close4_patterns:
             if p in s:
-                close4 += 1
-                break
+                close4 += s.count(p)
 
         for p in open3_patterns:
             if p in s:
-                open3 += 1
-                break
-
+                open3 += s.count(p)
     board[r][c] = "."
     return open4, close4, open3
 
 def local_score(board, r, c, player):
     score = 0
-
     if player == "O":
         patterns = EVAL_PATTERNS_O
     else:
@@ -180,23 +171,19 @@ def local_score(board, r, c, player):
         s = "#" + s + "#"
         for p, w in patterns:
             score += s.count(p) * w
-
     return score
 
 def check_threat(board, r, c):
     board[r][c] = "X"
-
     if check_win(board, "X"):
         board[r][c] = "."
         return 100000
-
     score = 0
     for dr, dc in DIRECTIONS:
         s = get_line(board, r, c, dr, dc)
         for p, w in THREAT_CHECK_PATTERNS:
             if p in s:
                 score += w
-
     board[r][c] = "."
     return score
 
@@ -211,9 +198,10 @@ def collect_blocks(line, coords):
             if idx == -1:
                 break
             for offset in indexes:
-                blocks.append((coords[idx + offset], weight))
+                pos = coords[idx + offset]
+                if line[idx + offset] == ".":
+                    blocks.append((pos, weight))
             idx += 1
-
     return blocks 
 
 def threat_block(board):
@@ -281,7 +269,6 @@ def threat_block(board):
 
     if not candidate_scores:
         return None
-
     return max(candidate_scores, key=candidate_scores.get)
 
 def win_move(board, player):
@@ -296,36 +283,63 @@ def win_move(board, player):
 def urgent_move(board):
     best = None
     best_score = 0
-
     for r, c in urgent_moves(board):
         score = check_threat(board, r, c)
-
         if score >= 100000:
             return (r, c)
 
         if score > best_score:
             best_score = score
             best = (r, c)
-
     return best if best_score > 0 else None
 
 def find_open4(board, player):
     best = None
     best_score = -1
-
     for r, c in get_moves(board):
         if board[r][c] != ".":
             continue
-
         open4, close4, open3 = count_threats(board, r, c, player)
-
         if open4 > 0:
             score = open4 * 100 + close4 * 10 + open3
             if score > best_score:
                 best_score = score
                 best = (r, c)
-
     return best
+
+def all_open4(board, player):
+    pos = []
+    for r, c in get_moves(board):
+        if board[r][c] != ".":
+            continue
+        open4, close4, open3 = count_threats(board, r, c, player)
+        if open4 > 0:
+            pos.append((r, c, open4, close4, open3))
+    return pos
+
+def all_threats(board, player):
+    pos = []
+    for r, c in get_moves(board):
+        if board[r][c] != ".":
+            continue
+        open4, close4, open3 = count_threats(board, r, c, player)
+        th_level = open4 * 1000 + close4 * 100 + open3 * 10
+        if th_level > 0:
+            pos.append((r, c, open4, close4, open3, th_level))
+    return pos
+
+def fork_move(board, r, c, player):
+    board[r][c] = player
+    threat_dirs = 0
+    open3_dirs = 0
+    for dr, dc in DIRECTIONS:
+        s = get_line(board, r, c, dr, dc)
+        if "XXXX" in s or "XXX." in s or ".XXX" in s:
+            threat_dirs += 1
+        if ".XXX." in s or ".XX.X." in s or ".X.XX." in s:
+            open3_dirs += 1
+    board[r][c] = "."
+    return (threat_dirs >= 2) or (threat_dirs >= 1 and open3_dirs >= 2)
 
 def move_score(board, r, c):
     state = bstate(board)
@@ -344,30 +358,33 @@ def move_score(board, r, c):
     board[r][c] = "O"
     attack = local_score(board, r, c, "O")
     o_open4, o_close4, o_open3 = count_threats(board, r, c, "O")
-    attack += o_open4 * 50000 + o_close4 * 12000 + o_open3 * 3000
+    attack += (o_open4 * 140000 + o_close4 * 45000 + o_open3 * 12000) 
     if o_open3 >= 2:
         attack += 50000
     board[r][c] = "."
-
     board[r][c] = "X"
     defense = local_score(board, r, c, "X")
+    # giảm thủ pattern nhẹ đầu game
+    if move_count < 10:
+        defense *= 0.45
+    elif move_count < 16:
+        defense *= 0.75
     x_open4, x_close4, x_open3 = count_threats(board, r, c, "X")
-    defense += x_open4 * 60000 + x_close4 * 15000 + x_open3 * 3500
+    defense += (x_open4 * 180000 + x_close4 * 60000 + x_open3 * 15000) 
     if x_open3 >= 2:
         defense += 60000
     board[r][c] = "."
 
     if move_count < 8:
-        defense_weight = 0.75
+        defense_weight = 0.45
     elif move_count < 14:
-        defense_weight = 0.95
+        defense_weight = 0.75 
     else:
-        defense_weight = 1.15
+        defense_weight = 1.1
 
     score = attack + defense * defense_weight + center_bonus
     MOVE_SCORE_CACHE[cache_key] = score
     return score
-
 
 def sort_moves(board, moves):
     state = bstate(board)
@@ -379,16 +396,13 @@ def sort_moves(board, moves):
         if cached_score is not None:
             return cached_score
         return move_score(board, r, c)
-
     moves.sort(key=score_for, reverse=True)
 
 def evaluate(board):
     score = 0
-
     for line in get_lines(board):
         s = "#" + "".join(line) + "#"
         score += eval_line(s)
-
     return score
 
 def minimax(board, depth, alpha, beta, maximizing):
@@ -452,38 +466,37 @@ def best_move(board, difficulty=0):
         return random.choice(moves) if moves else None
 
     move_count = sum(row.count("X") + row.count("O") for row in board)
+    candidate_scores = {}
 
     #ưu tiên tạo open4 trước
     ai_open4 = find_open4(board, "O")
-    opp_open4 = find_open4(board, "X")
-    if ai_open4 and not opp_open4:
+    if ai_open4:
         return ai_open4
 
-    #block đối thủ
-    block_existing = threat_block(board)
-    if block_existing:
-        urgent_block_score = check_threat(board, block_existing[0], block_existing[1])
-        should_force_block = move_count >= 10 or urgent_block_score >= 5000
-        if should_force_block:
-            return block_existing
+    block = threat_block(board)
+    if block:
+        return block
 
+    # tạo thế 2 đường
+    for r, c in get_moves(board):
+        if board[r][c] != ".":
+            continue
+        o4, c4, o3 = count_threats(board, r, c, "O")
+        ai_double = (o4 >= 2 or (o4 >= 1 and o3 >= 1) or o3 >= 2) 
+        if ai_double:
+            return (r, c)
+          
+    # block fork X
+    for r, c in get_moves(board):
+        if board[r][c] != ".":
+            continue
+        if fork_move(board, r, c, "X"):
+            return (r, c)
+        
     #xét urgent
     urgent = urgent_move(board)
     if urgent:
-        return urgent
-
-    # nếu đang rất sớm, ưu tiên phát triển thế tấn công hơn block pattern nhẹ
-    if block_existing and move_count >= 6:
-        return block_existing
-
-    if difficulty == 1:
-        opp_open4 = find_open4(board, "X")
-        opp_has_close4 = block_existing is not None
-
-        if not opp_open4 and not opp_has_close4:
-            ai_open4 = find_open4(board, "O")
-            if ai_open4:
-                return ai_open4
+        candidate_scores[urgent] = (candidate_scores.get(urgent, 0) + 500000)
 
     moves = get_moves(board)
     if not moves:
@@ -495,26 +508,27 @@ def best_move(board, difficulty=0):
 
     if difficulty == 0:
         moves = moves[:4]
+        depth = 1
     else:
         moves = moves[:6]
-
-    if move_count < 10:
-        depth = 1
-    elif move_count < 20:
-        depth = 2
-    else:
-        depth = 3
+        if move_count < 20:
+            depth = 2
+        elif move_count < 50:
+            depth = 3
+        else:
+            depth = 2
 
     best_score = -math.inf
     best = moves[0]
 
     for r, c in moves:
         board[r][c] = "O"
-        score = minimax(board, depth, -math.inf, math.inf, False)
+        minimax_score = minimax(board, depth, -math.inf, math.inf, False)
         board[r][c] = "."
-
+        tactical_bonus = candidate_scores.get((r,c), 0)
+        score = minimax_score + tactical_bonus
         if score > best_score:
             best_score = score
             best = (r, c)
 
-    return best
+    return best 

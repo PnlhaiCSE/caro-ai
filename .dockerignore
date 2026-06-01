@@ -2,7 +2,9 @@
 .venv/
 venv/
 
-# Python cache
+# Git
+.git
+.gitignore
 __pycache__/
 *.pyc
 *.pyo
@@ -10,10 +12,8 @@ __pycache__/
 
 # VS Code
 .vscode/
-
-# Environment variables
 .env
 
 # OS files
 .DS_Store
-Thumbs.db
+*.db

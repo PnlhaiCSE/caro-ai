@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PnlhaiCSE-Game CARO-AI</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/intro.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+</head>
+
+<body>
+    <div id="container">
+        <div id="title">🎮 GAME CARO-AI 8x8 🤖</div>
+        <div id="card">
+            <div class="tt">👤<strong>Tác giả:&nbsp;</strong>Phạm Nguyễn Long Hải</div>
+            <div class="tt">🎓<strong>Ngành học:&nbsp;</strong>Khoa học máy tính</div>
+            <div class="tt">🧑‍💻<strong>Vai trò:&nbsp;</strong>DevOps</div>
+        </div>
+
+        <div id="rules">
+            <div id="rules-title">📖 HƯỚNG DẪN CHƠI</div>
+            <ul id="list">
+                <li>AI tích hợp thuật toán <b style="color: brown;">Alpha-Beta Pruning</b> để tính toán
+                    nước đi.</li>
+                <li>Chọn <b>độ khó</b> trước mỗi ván và bấm nút <b>Bắt đầu</b> để chơi</li>
+                <li>Tạo ra 5 quân liên tiếp để chiến thắng</li>
+            </ul>
+            <section>
+                <div class="diff" id="de">
+                    🟢 <strong>Dễ:</strong> Tỷ lệ thắng của bạn là <strong>99.9%</strong> <br>
+                    &nbsp; &nbsp;(AI đánh random).
+                </div>
+                <div class="diff" id="trb">
+                    🟡 <strong>Trung bình:</strong> Tỷ lệ thắng là <strong>50%</strong> <br>
+                    &nbsp; &nbsp;(AI sử dụng cắt tỉa Alpha-Beta với Depth 1).
+                </div>
+                <div class="diff" id="kho">
+                    🔴 <strong>Khó:</strong> Tỷ lệ thắng chỉ còn <strong>0.001%</strong> <br>
+                    &nbsp; &nbsp;(AI tính toán tối ưu cực hạn).
+                </div>
+            </section>
+        </div>
+
+        <a id="nut">🎮 PLAY NOW</a>
+    </div>
+
+    <div id="ngang">
+        📱<br>
+        Vui lòng xoay dọc màn hình
+    </div>
+    <script>
+        function checkNgang() {
+            const mobile = navigator.maxTouchPoints > 0 &&
+                /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            const ngangg = window.innerWidth > window.innerHeight;
+
+            $("#ngang").css("display",
+                mobile && ngangg ? "flex" : "none"
+            );
+        }
+
+        $(window).on("resize orientationchange", checkNgang);
+
+        $(document).ready(function () {
+            checkNgang();
+
+            $("#nut").click(function (e) {
+                e.preventDefault();
+                localStorage.removeItem("caroGameStats");
+                window.location.href = "/game";
+            });
+        });
+    </script>
+</body>
+
+</html>

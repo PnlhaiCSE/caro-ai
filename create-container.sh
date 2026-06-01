@@ -1,10 +1,11 @@
 #!/bin/bash
 
 set -e 
-
-git pull 
+ 
+#kill process
+fuser -k 5100/tcp 2>/dev/null || true
 docker compose up -d --build 
 
 echo "BUILD COMPLETE"
-echo "RUNNING..."
+echo "...RUNNING..."
 docker ps 

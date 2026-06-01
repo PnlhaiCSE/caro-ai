@@ -3,45 +3,112 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PnlhaiCSE-Game CARO-AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-fluid">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
+            <div class="container">
+                <div id="leftPanel">
+                    <h1>CARO-AI 8x8</h1>
 
-        <h1>CARO-AI 10X10</h1>
+                    <span id="ten">Made by <b><span style="font-family: Brush Script MT;">CSE</span> Phạm Nguyễn
+                            Long Hải</b> with 💗</span>
+                    <div id="difficultyPanel">
+                        <label class="fw-bold"><input type="radio" name="difficulty" value="-1">Dễ</label>
+                        <label class="fw-bold"><input type="radio" name="difficulty" value="0" checked>Trung
+                            bình</label>
+                        <label class="fw-bold"><input type="radio" name="difficulty" value="1">Khó</label>
+                    </div>
 
-        <div id="difficultyPanel">
-            <label><input type="radio" name="difficulty" value="-1"> Dễ</label>
-            <label><input type="radio" name="difficulty" value="0" checked> Trung bình</label>
-            <label><input type="radio" name="difficulty" value="1"> Khó</label>
-        </div>
+                    <div id="players">
+                        <span>Bạn: </span><span id="playerInfo">X</span>
+                        <span>AI: </span><span id="aiInfo">O</span>
+                    </div>
 
-        <div id="players">
-            <span>Bạn: </span><span id="playerInfo">X</span>
-            <span>AI: </span><span id="aiInfo">O</span>
-        </div>
+                    <div id="turn" style="margin-bottom: 5px;"></div>
 
-        <div id="turn" style="margin-bottom: 5px;"></div>
+                    <div id="boardWrapper">
+                        <div id="board"></div>
+                        <div id="winLine"></div>
+                    </div>
+                </div>
 
-        <div id="boardWrapper">
-            <div id="board"></div>
-            <div id="winLine"></div>
-        </div>
+                <div id="winModal">
+                    <div class="modalContent">
+                        <h2 id="modalText"></h2>
+                        <button onclick="restartGame()">Chơi lại</button>
+                    </div>
+                </div>
 
-        <div id="winModal" class="modal">
-            <div class="modal-content">
-                <h2 id="modalText"></h2>
-                <button onclick="restartGame()">Chơi lại</button>
+                <div class="button-row">
+                    <button id="homeBtn" class="action-btn">🏠 Trang chủ</button>
+                    <button id="startBtn" class="action-btn" onclick="startGame()">🎮 Bắt đầu</button>
+                </div>
+            </div>
+
+            <div id="statsBoard" class="ms-md-2">
+                <h3>📊 Thống kê</h3>
+
+                <div class="stats-item">
+                    <div class="difficulty-label">Dễ</div>
+                    <div class="stats-row">
+                        <span>🏆 <strong id="easy-wins">0</strong></span>
+                        <span>🤝 <strong id="easy-draws">0</strong></span>
+                        <span>💥 <strong id="easy-losses">0</strong></span>
+                    </div>
+                </div>
+
+                <div class="stats-item">
+                    <div class="difficulty-label">Trung bình</div>
+                    <div class="stats-row">
+                        <span>🏆 <strong id="medium-wins">0</strong></span>
+                        <span>🤝 <strong id="medium-draws">0</strong></span>
+                        <span>💥 <strong id="medium-losses">0</strong></span>
+                    </div>
+                </div>
+
+                <div class="stats-item">
+                    <div class="difficulty-label">Khó</div>
+                    <div class="stats-row">
+                        <span>🏆 <strong id="hard-wins">0</strong></span>
+                        <span>🤝 <strong id="hard-draws">0</strong></span>
+                        <span>💥 <strong id="hard-losses">0</strong></span>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <button id="startBtn" onclick="startGame()">🎮 Bắt đầu</button>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div id="ngang">
+        📱<br>
+        Vui lòng xoay dọc màn hình
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        function checkNgang() {
+            const mobile = navigator.maxTouchPoints > 0 &&
+                /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            const ngangg = window.innerWidth > window.innerHeight;
+
+            $("#ngang").css("display",
+                mobile && ngangg ? "flex" : "none"
+            );
+        }
+
+        $(window).on("resize orientationchange", checkNgang);
+
+        $(document).ready(function () {
+            checkNgang();
+        });
+    </script>
 </body>
 
 </html>

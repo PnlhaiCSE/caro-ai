@@ -1,4 +1,4 @@
-SIZE = 10
+SIZE = 8
 
 def create_board():
     return [["." for _ in range(SIZE)] for _ in range(SIZE)]
