@@ -199,7 +199,7 @@ http://localhost:5100
 
 ## 📄License
 
-This project is licensed under the MIT License.<br>
+This project is licensed under the [MIT License](./LICENSE).<br>
 Được phép sử dụng, chỉnh sửa và phát triển dự án cho mục đích cá nhân hoặc học tập.
 
 ---
