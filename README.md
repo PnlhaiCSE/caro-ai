@@ -200,7 +200,7 @@ http://localhost:5100
 ## 📄License
 
 This project is licensed under the MIT License.<br>
-Được phép sử dụng, chỉnh sửa, học tập và phát triển dự án cho mục đích cá nhân.
+Được phép sử dụng, chỉnh sửa và phát triển dự án cho mục đích cá nhân hoặc học tập.
 
 ---
 
