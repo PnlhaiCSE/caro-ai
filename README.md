@@ -93,9 +93,9 @@ Trả kết quả best move
 🟣 Ưu tiên các chuỗi ép thắng và phòng thủ bắt buộc.<br>
 
 ### &nbsp; &nbsp; 🔍Kết quả:
-```text
+<p>
 AI được thiết kế để không bỏ sót các nước thắng hoặc nước chặn quan trọng, có khả năng phòng thủ gần như tuyệt đối trước các chiến thuật phổ biến (cơ bản) trên bàn cờ 8×8.
-```
+</p>
 
 ---
 
